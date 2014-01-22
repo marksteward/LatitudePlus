@@ -54,12 +54,15 @@ function load_user() {
 
     casper.thenOpen('https://plus.google.com/118142099227812183665/posts', function() {
         this.capture('output/3.png');
+        fs.write('output/marksteward@gmail.com.txt', this.getHTML());
 
         var result = this.evaluate(function() {
             var q = AF_initDataChunkQueue;
             for(var i = 0; i < q.length; i++) {
                 if (q[i].key == '123') {
-                    var loc = q[i].data[1][0];
+                    var data = q[i].data;
+                    if (typeof(data) == 'function') data = data();
+                    var loc = data[1][0];
                     return loc[2] + ',' + loc[3];
                 }
             }
