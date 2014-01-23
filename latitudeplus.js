@@ -18,7 +18,7 @@ casper.start('https://www.google.com/settings/personalinfo', function() {
         do_login.call(this);
     }
 
-    load_user.call(this);
+    load_user.call(this, config.ids[0]);
 
 });
 
@@ -44,17 +44,17 @@ function do_login() {
     });
 }
 
-function load_user() {
+function load_user(id) {
 
     casper.options.onResourceRequested = function(casper, req, netreq) {
-        if (req.url != 'https://plus.google.com/118142099227812183665/posts') {
+        if (req.url != 'https://plus.google.com/' + id + '/posts') {
             netreq.abort();
         }
     };
 
-    casper.thenOpen('https://plus.google.com/118142099227812183665/posts', function() {
+    casper.thenOpen('https://plus.google.com/' + id + '/posts', function() {
         this.capture('output/3.png');
-        fs.write('output/marksteward@gmail.com.txt', this.getHTML());
+        fs.write('output/' + id + '.txt', this.getHTML());
 
         var result = this.evaluate(function() {
             var q = AF_initDataChunkQueue;
@@ -62,18 +62,31 @@ function load_user() {
                 if (q[i].key == '123') {
                     var data = q[i].data;
                     if (typeof(data) == 'function') data = data();
-                    var loc = data[1][0];
-                    return loc[2] + ',' + loc[3];
+                    var locs = data[1];
+                    if (locs.length) {
+                        var loc = locs[0];
+                        return JSON.stringify(loc.slice(0, 6));
+                    }
                 }
             }
         });
-        fs.write('output/location.txt', result, 'w');
-        console.log('Location updated to: ' + result);
+        try {
+            var loc = JSON.parse(result);
+            var lat = loc[2];
+            var lon = loc[3];
+            var ts = loc[4];
+            var acc = loc[5];
+            var output = id + ',' + ts + ',' + lat + ',' + lon + ',' + acc;
+            fs.write('output/location.txt', output, 'w');
+            console.log('Location updated to: ' + output);
+        } catch(e) {
+            console.log('Error parsing result: ' + result);
+        }
     });
 
     casper.then(function() {
         this.wait(60 * 1000);
-        load_user.call(this);
+        load_user.call(this, config.ids[0]);
     });
 }
 
