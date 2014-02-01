@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export COOKIES_FILE=cookie.dat
-export PHANTOMJS_EXECUTABLE=~/phantomjs-1.9.2-linux-x86_64/bin/phantomjs
+export PHANTOMJS_EXECUTABLE=~/Downloads/phantomjs-1.9.7-linux-x86_64/bin/phantomjs
 export CASPERJS_EXECUTABLE=~/src/casperjs-1.1-beta3/bin/casperjs
 
 $CASPERJS_EXECUTABLE --cookies-file=$COOKIES_FILE $*
